@@ -1,0 +1,63 @@
+on: 
+  push
+
+name: generate_pkg_list
+
+jobs:
+  generate_pkg_list:
+    runs-on: ${{ matrix.config.os }}
+    name: ${{ matrix.config.os }}
+        
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {os: macOS-latest, bioc: 'devel'}
+        - {os: windows-latest, bioc: 'devel'}
+        - {os: ubuntu-latest, bioc: 'devel'}
+
+    env:
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+      _R_CHECK_FORCE_SUGGESTS_: false
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v2
+
+      - name: Set up R and install BiocManager
+        uses: grimbough/bioc-actions/setup-bioc@v1
+        with:
+          bioc-version: ${{ matrix.config.bioc }}
+      
+      - name: Build and test environment
+        run: |
+          BiocManager::install(c("basilisk", "basilisk.utils"))
+          
+          deps <- c(
+              "python==3.10", 
+              "scvelo==0.3.1", 
+              "pillow==9.2"
+          )
+
+          basilisk.utils::installConda()
+          basilisk::setupBasiliskEnv(
+            envpath = file.path(".", "scvelo-basilisk-env"),
+            packages = deps,
+            channels = "conda-forge")
+          res <- basilisk::basiliskRun(
+            env = file.path(".", "scvelo-basilisk-env"),
+            fun = function() {
+                scv <- reticulate::import("scvelo")
+                scv$`__version__`
+            })
+          print(res)
+          print(basilisk::listPackages(env = file.path(".", "scvelo-basilisk-env")))
+        shell: Rscript {0}
+
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v2.2.0
+
+      - name: List content of environment
+        run: conda list -p ./scvelo-basilisk-env
