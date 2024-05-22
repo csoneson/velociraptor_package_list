@@ -14,8 +14,8 @@ jobs:
         config:
         - {os: macOS-latest, bioc: 'devel', miniconda: 'py39_22.11.1-1'}
         - {os: macOS-12, bioc: 'devel', miniconda: 'py39_22.11.1-1'}
-        - {os: windows-latest, bioc: 'devel', miniconda: 'py39_22.11.1-1'}
-        - {os: ubuntu-latest, bioc: 'devel', miniconda: 'py39_22.11.1-1'}
+        - {os: windows-latest, bioc: 'devel', miniconda: 'py39_4.12.0'}
+        - {os: ubuntu-20.04, bioc: 'devel', miniconda: 'py39_22.11.1-1'}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
