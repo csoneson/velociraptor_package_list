@@ -1,5 +1,5 @@
 on: 
-  push
+  #push
 
 name: generate_pkg_list_newconda
 
